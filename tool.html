@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>可视化工具 — Miokr</title>
+  <meta name="description" content="Miokr 可视化工具主页面：本地上传 CSV，一键切换散点、折线、面积、柱状、直方、箱线、热力、桑基、拓扑、地图点位，支持 PNG/SVG 导出。">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/tool.css">
+</head>
+<body class="tool-body">
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">
+        <span class="logo-mark">M</span> Miokr <span class="tld">miokr.com</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="tool.html" class="active">工具</a>
+        <a href="pricing.html">定价</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 数据信息提示区 -->
+  <div class="data-bar">
+    <div class="data-bar-inner">
+      <div class="data-stat"><span class="dot"></span>数据集：<strong id="statName">—</strong></div>
+      <div class="data-stat">行数：<strong id="statRows">0</strong></div>
+      <div class="data-stat">列数：<strong id="statCols">0</strong></div>
+      <div class="data-stat">数值列：
+        <div class="chip-list" id="statNumeric"></div>
+      </div>
+      <div class="data-stat">文本列：
+        <div class="chip-list" id="statText"></div>
+      </div>
+      <div class="member-flag"><span class="badge" id="memberBadge">免费版</span></div>
+    </div>
+  </div>
+
+  <!-- 主工作区 -->
+  <div class="workspace">
+
+    <!-- 左：控制面板 -->
+    <aside class="panel">
+      <div class="panel-section">
+        <h4>数据源</h4>
+        <div class="field">
+          <label class="upload-box" for="fileInput">
+            <div class="up-icon">📁</div>
+            <div class="up-text">点击上传本地 CSV<br><span class="muted" style="font-size:.72rem">仅浏览器本地处理，不上传</span></div>
+            <input type="file" id="fileInput" accept=".csv,text/csv">
+          </label>
+        </div>
+        <div class="field">
+          <label for="sampleSelect">或选择内置示例</label>
+          <select id="sampleSelect"></select>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h4>图表类型</h4>
+        <div class="type-grid" id="typeGrid"></div>
+      </div>
+
+      <div class="panel-section">
+        <h4>字段映射</h4>
+        <div id="fieldMap"></div>
+      </div>
+
+      <div class="panel-section">
+        <div class="actions-row">
+          <button class="btn btn-ghost btn-sm" id="btnRefresh">↻ 刷新</button>
+          <button class="btn btn-ghost btn-sm" id="btnReset">重置</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 右：图表展示区 -->
+    <main class="chart-area">
+      <div class="chart-head">
+        <div class="chart-title">
+          <span id="chartTitle">图表预览</span>
+          <small id="chartSubtitle">选择数据与图表类型开始</small>
+        </div>
+        <div class="chart-tools">
+          <button class="btn btn-ghost btn-sm" id="btnSVG">导出 SVG</button>
+          <button class="btn btn-primary btn-sm" id="btnPNG">导出 PNG</button>
+        </div>
+      </div>
+      <div id="chartContainer">
+        <div class="placeholder">
+          <div class="ph-icon">📊</div>
+          <p>正在加载示例数据…</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <p class="compliance">
+        本工具基于 <strong>D3.js、Observable Plot（ISC 开源协议）</strong>开发<br>
+        所有用户文件仅在浏览器本地处理，不会上传服务器<br>
+        <strong>Miokr® 可视化工具 版权所有</strong>
+      </p>
+      <div class="foot-links">
+        <a href="index.html">首页</a>· <a href="tool.html">工具</a>· <a href="pricing.html">定价</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 依赖库（本地内置） -->
+  <script src="assets/js/lib/d3.min.js"></script>
+  <script src="assets/js/lib/plot.min.js"></script>
+  <script src="assets/js/lib/d3-sankey.min.js"></script>
+  <!-- 应用模块 -->
+  <script src="assets/js/csv.js"></script>
+  <script src="assets/js/data/samples.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script src="assets/js/sankey.js"></script>
+  <script src="assets/js/network.js"></script>
+  <script src="assets/js/geo.js"></script>
+  <script src="assets/js/export.js"></script>
+  <script src="assets/js/app.js"></script>
+
+</body>
+</html>

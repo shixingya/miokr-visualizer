@@ -1,0 +1,103 @@
+/* Miokr landing.css — 首页样式 */
+
+.hero {
+  padding: 88px 0 72px;
+  background:
+    radial-gradient(1200px 400px at 50% -10%, var(--primary-light), transparent 70%),
+    var(--bg);
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.hero .eyebrow {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--primary-dark);
+  font-size: .82rem;
+  font-weight: 600;
+}
+.hero h1 {
+  font-size: 3rem;
+  margin-bottom: .35em;
+}
+.hero h1 .accent { color: var(--primary); }
+.hero .subtitle {
+  font-size: 1.2rem;
+  color: var(--text-soft);
+  max-width: 640px;
+  margin: 0 auto 12px;
+}
+.hero .domain {
+  font-family: var(--mono);
+  font-size: .9rem;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.hero-note {
+  margin-top: 20px;
+  font-size: .82rem;
+  color: var(--text-muted);
+}
+
+/* 亮点卡片 */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+.feature-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px 22px;
+  box-shadow: var(--shadow-sm);
+}
+.feature-card .icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: grid; place-items: center;
+  font-size: 1.2rem; font-weight: 800;
+  margin-bottom: 16px;
+}
+.feature-card h3 { font-size: 1.05rem; margin-bottom: 8px; }
+.feature-card p { font-size: .92rem; margin: 0; }
+
+/* 图表类型展示 */
+.chart-types {
+  background: var(--bg-soft);
+}
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+}
+.chart-chip {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px 14px;
+  text-align: center;
+  font-weight: 600;
+  font-size: .92rem;
+  color: var(--text-soft);
+}
+.chart-chip span { display: block; font-size: 1.3rem; margin-bottom: 8px; color: var(--primary); }
+
+/* CTA */
+.cta {
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary), #1e40af);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 52px 32px;
+}
+.cta h2 { color: #fff; }
+.cta p { color: rgba(255,255,255,.85); max-width: 520px; margin: 0 auto 26px; }
+.cta .btn-primary { background: #fff; color: var(--primary-dark); }
+.cta .btn-primary:hover { background: #f1f5f9; }

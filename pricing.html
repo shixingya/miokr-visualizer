@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>定价与会员 — Miokr</title>
+  <meta name="description" content="Miokr 提供免费版与会员版。免费版支持全部图表（导出带水印），会员版无水印高清导出、更多模板，一次性解锁。">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/pricing.css">
+</head>
+<body>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">
+        <span class="logo-mark">M</span> Miokr <span class="tld">miokr.com</span>
+      </a>
+      <nav class="nav-links">
+        <a href="index.html">首页</a>
+        <a href="tool.html">工具</a>
+        <a href="pricing.html" class="active">定价</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="pricing-hero">
+    <div class="container">
+      <h1>简单透明的定价</h1>
+      <p>免费版即可使用全部图表功能。会员为一次性解锁，无订阅、无套路，永久享受无水印高清导出。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="plans">
+        <!-- 免费版 -->
+        <div class="plan">
+          <h3>免费版</h3>
+          <div class="price">¥0<small> / 永久</small></div>
+          <p class="plan-desc">适合快速体验与轻量使用</p>
+          <ul>
+            <li>全部 10 种图表类型</li>
+            <li>本地 CSV 上传与解析</li>
+            <li>自动识别数值 / 文本列</li>
+            <li>PNG / SVG 导出（带水印）</li>
+            <li class="no">无水印高清导出</li>
+            <li class="no">会员专属模板</li>
+          </ul>
+          <a class="btn btn-ghost" href="tool.html">免费开始使用</a>
+        </div>
+
+        <!-- 会员版 -->
+        <div class="plan featured">
+          <span class="tag">推荐</span>
+          <h3>会员版</h3>
+          <div class="price">一次性解锁<small> / 永久有效</small></div>
+          <p class="plan-desc">适合科研、工程与商业报告输出</p>
+          <ul>
+            <li>包含免费版全部功能</li>
+            <li><strong>无水印</strong>导出</li>
+            <li><strong>高清 2x</strong> PNG 输出</li>
+            <li>更多配色与图表模板</li>
+            <li>后续新功能优先体验</li>
+            <li>商用授权，可放入报告与产品</li>
+          </ul>
+          <a class="btn btn-primary" href="#unlock">了解解锁方案</a>
+        </div>
+      </div>
+
+      <!-- 一次性解锁说明 -->
+      <div class="unlock-note" id="unlock">
+        <h3>一次性解锁方案说明</h3>
+        <p>Miokr 会员采用<strong>一次性买断</strong>，非订阅制。解锁后在当前浏览器永久生效，无水印、高清导出与会员模板即刻可用。</p>
+        <p class="muted">MVP 阶段为零后端纯前端产品，会员状态保存在你本机浏览器（localStorage），不涉及任何账号体系与服务器存储。正式支付通道上线后将提供跨设备激活码。</p>
+        <div class="member-toggle">
+          <label for="memberSwitch"><strong>体验会员模式：</strong></label>
+          <input type="checkbox" id="memberSwitch">
+          <span id="memberState" class="badge">当前：免费版</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <div class="container">
+      <div class="section-head"><h2>常见问题</h2></div>
+      <div class="faq">
+        <details>
+          <summary>我的数据会被上传吗？</summary>
+          <p>不会。Miokr 是纯前端工具，所有 CSV 文件仅在你的浏览器本地解析与运算，全程不经过任何服务器，也不做任何数据收集。</p>
+        </details>
+        <details>
+          <summary>免费版和会员版功能有差别吗？</summary>
+          <p>图表功能完全一致。差别仅在导出：免费版导出带「Miokr 免费版」水印，会员版无水印并支持 2x 高清 PNG。</p>
+        </details>
+        <details>
+          <summary>可以用于商业用途吗？</summary>
+          <p>可以。会员版包含商用授权，导出的图表可直接用于论文、商业报告、产品与演示。工具本身基于 ISC 开源协议的 D3.js 与 Observable Plot 构建，无版权风险。</p>
+        </details>
+        <details>
+          <summary>需要注册账号吗？</summary>
+          <p>不需要。打开即用，无需注册、无需安装、无需联网上传。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <p class="compliance">
+        本工具基于 <strong>D3.js、Observable Plot（ISC 开源协议）</strong>开发<br>
+        所有用户文件仅在浏览器本地处理，不会上传服务器<br>
+        <strong>Miokr® 可视化工具 版权所有</strong>
+      </p>
+      <div class="foot-links">
+        <a href="index.html">首页</a>· <a href="tool.html">工具</a>· <a href="pricing.html">定价</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 会员开关（纯客户端 localStorage，无后端校验）
+    (function () {
+      var KEY = 'miokr_member';
+      var sw = document.getElementById('memberSwitch');
+      var state = document.getElementById('memberState');
+      function sync() {
+        var on = localStorage.getItem(KEY) === '1';
+        sw.checked = on;
+        state.textContent = on ? '当前：会员版（无水印）' : '当前：免费版';
+        state.style.background = on ? '#d1fae5' : '';
+        state.style.color = on ? '#065f46' : '';
+      }
+      sw.addEventListener('change', function () {
+        if (sw.checked) localStorage.setItem(KEY, '1');
+        else localStorage.removeItem(KEY);
+        sync();
+      });
+      sync();
+    })();
+  </script>
+
+</body>
+</html>
