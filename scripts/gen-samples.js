@@ -111,6 +111,37 @@ const datasets = {};
   datasets.geo_points = { header, rows, label: '观测站点（经纬度点位）' };
 })();
 
+// 7) 数据清洗演示：含缺失值与重复行的试验记录
+(() => {
+  const header = ['run_id', 'material', 'thickness_mm', 'peak_load_kN', 'elongation_pct', 'operator'];
+  const mats = ['Q235', 'Q345', '6061-T6', 'TC4'];
+  const operators = ['张工', '李工', '王工'];
+  const rows = [];
+  for (let i = 1; i <= 36; i++) {
+    const mat = mats[i % mats.length];
+    const base = mat === 'Q235' ? 120 : mat === 'Q345' ? 165 : mat === '6061-T6' ? 88 : 210;
+    rows.push([
+      'RUN' + String(i).padStart(3, '0'),
+      mat,
+      round(range(1.5, 6.0), 2),
+      round(base * range(0.82, 1.18), 2),
+      round(range(0.8, 8.5), 2),
+      operators[i % operators.length],
+    ]);
+  }
+  // 制造缺失值（空单元格）：数值列 + 文本列
+  [3, 9, 17, 25, 31].forEach(i => { rows[i - 1][3] = ''; });
+  [6, 14, 22, 28].forEach(i => { rows[i - 1][4] = ''; });
+  [11, 20, 33].forEach(i => { rows[i - 1][5] = ''; });
+  // 制造重复行：整行重复 + 除编号外完全相同
+  rows.push(rows[0].slice());
+  rows.push(rows[5].slice());
+  rows.push(['RUN037', rows[10][1], rows[10][2], rows[10][3], rows[10][4], rows[10][5]]);
+  rows.push(['RUN038', 'Q345', 3.02, 168.4, 4.55, '李工']);
+  rows.push(['RUN038', 'Q345', 3.02, 168.4, 4.55, '李工']);
+  datasets.clean_demo = { header, rows, label: '含缺失/重复的试验记录（清洗演示）' };
+})();
+
 // 写独立 CSV 文件
 for (const [name, d] of Object.entries(datasets)) {
   fs.writeFileSync(path.join(samplesDir, name + '.csv'), toCSV(d.header, d.rows), 'utf8');

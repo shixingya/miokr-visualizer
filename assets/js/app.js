@@ -7,7 +7,7 @@
   'use strict';
 
   var M = global.Miokr;
-  var csv = M.csv, charts = M.charts;
+  var csv = M.csv, charts = M.charts, clean = M.clean;
 
   // 图表类型定义（含各自所需字段映射）
   var CHARTS = [
@@ -51,9 +51,13 @@
   var state = {
     name: '—',
     columns: [],
-    rows: [],        // 原始字符串行
+    rowsRaw: [],     // 原始字符串行（清洗前）
+    rows: [],        // 原始字符串行（清洗后）
     typed: [],       // 数值转换后的行
     meta: null,      // 列类型元信息
+    det: null,       // 列识别结果
+    ops: [],         // 清洗规则（有序）
+    steps: [],       // 各规则执行结果（行数变化）
     chart: 'scatter',
     fields: {}       // 当前图表的字段映射 {key: columnName}
   };
@@ -103,6 +107,8 @@
       reader.readAsText(file, 'utf-8');
     });
 
+    buildCleanUI();
+
     $('btnRefresh').addEventListener('click', render);
     $('btnReset').addEventListener('click', function () {
       el.sampleSelect.value = '0';
@@ -139,10 +145,16 @@
       var det = csv.detectColumns(parsed.rows, parsed.columns);
       state.name = name;
       state.columns = parsed.columns;
+      state.rowsRaw = parsed.rows;
       state.rows = parsed.rows;
       state.meta = det.meta;
+      state.det = det;
+      state.ops = [];
+      state.steps = [];
       state.typed = csv.coerceNumeric(parsed.rows, parsed.columns, det.meta);
-      updateDataBar(det);
+      refreshCleanUI();
+      updateDataBar();
+      updateOpsList();
       selectChart(pickDefaultChart(det), true);
     } catch (err) {
       showError('数据解析出错：' + err.message);
@@ -161,10 +173,16 @@
     return 'bar';
   }
 
-  function updateDataBar(det) {
+  function updateDataBar() {
+    var det = state.det;
+    if (!det) return;
     $('statName').textContent = state.name;
     $('statRows').textContent = state.rows.length;
     $('statCols').textContent = state.columns.length;
+    var rawEl = $('statRowsRaw');
+    if (rawEl) {
+      rawEl.textContent = state.ops.length ? '/ 原始 ' + state.rowsRaw.length + ' 行' : '';
+    }
     var numBox = $('statNumeric'), textBox = $('statText');
     numBox.innerHTML = ''; textBox.innerHTML = '';
     det.numeric.forEach(function (c) { numBox.appendChild(chip(c, true)); });
@@ -178,6 +196,216 @@
     s.className = 'chip' + (num ? ' num' : '');
     s.textContent = text;
     return s;
+  }
+
+  // ---------- 数据清洗与筛选 ----------
+  function buildCleanUI() {
+    el.cleanStatus = $('cleanStatus');
+    el.opsList = $('opsList');
+    el.missCol = $('missCol');
+    el.missStrategy = $('missStrategy');
+    el.missConst = $('missConst');
+    el.missConstWrap = $('missConstWrap');
+    el.dedupeCol = $('dedupeCol');
+    el.filterCol = $('filterCol');
+    el.filterMode = $('filterMode');
+    el.filterMin = $('filterMin');
+    el.filterMax = $('filterMax');
+    el.filterValue = $('filterValue');
+    el.filterRangeWrap = $('filterRangeWrap');
+    el.filterValueWrap = $('filterValueWrap');
+    el.sortCol = $('sortCol');
+    el.sortDir = $('sortDir');
+
+    el.missStrategy.addEventListener('change', function () {
+      el.missConstWrap.classList.toggle('hidden', el.missStrategy.value !== 'constant');
+    });
+
+    el.filterCol.addEventListener('change', function () {
+      resetFilterMode();
+      syncFilterInputs();
+    });
+    el.filterMode.addEventListener('change', syncFilterInputs);
+
+    $('btnMissing').addEventListener('click', addMissingOp);
+    $('btnDedupe').addEventListener('click', function () {
+      addOp({ type: 'dedupe', column: el.dedupeCol.value });
+    });
+    $('btnFilter').addEventListener('click', addFilterOp);
+    $('btnSort').addEventListener('click', function () {
+      addOp({ type: 'sort', column: el.sortCol.value, dir: el.sortDir.value });
+    });
+    $('btnClearOps').addEventListener('click', function () {
+      if (!state.ops.length) return;
+      state.ops = [];
+      rebuild();
+    });
+  }
+
+  /** 依据当前列信息重建各下拉选项，尽量保留原有选择 */
+  function refreshCleanUI() {
+    if (!el.missCol) return;
+    fillColSelect(el.missCol, '全部列', el.missCol.value);
+    fillColSelect(el.dedupeCol, '全部列', el.dedupeCol.value);
+    fillColSelect(el.filterCol, null, el.filterCol.value);
+    fillColSelect(el.sortCol, null, el.sortCol.value);
+    resetFilterMode();
+    syncFilterInputs();
+  }
+
+  function fillColSelect(sel, allLabel, prev) {
+    var keep = prev || sel.value;
+    sel.innerHTML = '';
+    if (allLabel) {
+      var o = document.createElement('option');
+      o.value = clean.ALL;
+      o.textContent = allLabel;
+      sel.appendChild(o);
+    }
+    state.columns.forEach(function (c) {
+      var opt = document.createElement('option');
+      opt.value = c;
+      var t = state.meta[c] ? state.meta[c].type : '';
+      opt.textContent = c + (t === 'numeric' ? '  #数值' : t === 'text' ? '  #文本' : '');
+      sel.appendChild(opt);
+    });
+    if (keep) {
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === keep) { sel.value = keep; break; }
+      }
+    }
+  }
+
+  /** 依当前筛选列的类型给出默认筛选方式：数值列按范围，文本列按包含 */
+  function resetFilterMode() {
+    var t = state.meta[el.filterCol.value];
+    el.filterMode.value = t && t.type === 'numeric' ? 'range' : 'contains';
+  }
+
+  function syncFilterInputs() {
+    var isRange = el.filterMode.value === 'range';
+    el.filterRangeWrap.classList.toggle('hidden', !isRange);
+    el.filterValueWrap.classList.toggle('hidden', isRange);
+  }
+
+  function addMissingOp() {
+    var strategy = el.missStrategy.value;
+    var column = el.missCol.value;
+    if (strategy === 'constant' && el.missConst.value === '') {
+      alert('请填写用于填充的常数。');
+      return;
+    }
+    if (strategy === 'mean' && column !== clean.ALL) {
+      var t = state.meta[column];
+      if (!t || t.type !== 'numeric') {
+        alert('「' + column + '」不是数值列，无法填充均值，请改用填充常数。');
+        return;
+      }
+    }
+    addOp({
+      type: 'missing',
+      column: column,
+      strategy: strategy,
+      value: strategy === 'constant' ? el.missConst.value : ''
+    });
+  }
+
+  function addFilterOp() {
+    var mode = el.filterMode.value;
+    var column = el.filterCol.value;
+    if (!column) return;
+    if (mode === 'range') {
+      if (el.filterMin.value.trim() === '' && el.filterMax.value.trim() === '') {
+        alert('范围筛选请至少填写最小值或最大值。');
+        return;
+      }
+      addOp({ type: 'filter', column: column, mode: mode, min: el.filterMin.value.trim(), max: el.filterMax.value.trim() });
+      return;
+    }
+    if (el.filterValue.value.trim() === '') {
+      alert('请填写筛选值。');
+      return;
+    }
+    addOp({ type: 'filter', column: column, mode: mode, value: el.filterValue.value.trim() });
+  }
+
+  function addOp(op) {
+    state.ops.push(op);
+    rebuild();
+  }
+
+  /** 从原始数据按规则顺序重算，并刷新全站视图 */
+  function rebuild() {
+    if (!state.columns.length) return;
+    var res = clean.applyOps(state.rowsRaw, state.columns, state.meta, state.ops);
+    state.rows = res.rows;
+    state.steps = res.steps;
+    state.typed = csv.coerceNumeric(state.rows, state.columns, state.meta);
+    updateDataBar();
+    updateOpsList();
+    render();
+  }
+
+  function updateOpsList() {
+    if (!el.opsList) return;
+    el.opsList.innerHTML = '';
+    $('opsCount').textContent = String(state.ops.length);
+    if (!state.ops.length) {
+      var empty = document.createElement('div');
+      empty.className = 'op-empty';
+      empty.textContent = '尚未添加规则，图表使用全部数据。';
+      el.opsList.appendChild(empty);
+    }
+    state.ops.forEach(function (op, i) {
+      var step = state.steps[i] || {};
+      var row = document.createElement('div');
+      row.className = 'op-item';
+
+      var label = document.createElement('span');
+      label.className = 'op-label';
+      label.textContent = clean.describe(op, state.columns);
+      if (step.error) label.textContent += '（执行失败：' + step.error + '）';
+
+      var count = document.createElement('span');
+      count.className = 'op-count' + (step.after < step.before ? ' down' : '');
+      count.textContent = step.before + ' → ' + step.after;
+
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'op-del';
+      del.title = '删除该规则';
+      del.textContent = '✕';
+      del.addEventListener('click', function () {
+        state.ops.splice(i, 1);
+        rebuild();
+      });
+
+      row.appendChild(label);
+      row.appendChild(count);
+      row.appendChild(del);
+      el.opsList.appendChild(row);
+    });
+    updateCleanStatus();
+  }
+
+  function updateCleanStatus() {
+    if (!el.cleanStatus) return;
+    var raw = state.rowsRaw.length, cur = state.rows.length;
+    el.cleanStatus.innerHTML = '';
+    el.cleanStatus.appendChild(document.createTextNode('原始 '));
+    el.cleanStatus.appendChild(bold(String(raw)));
+    el.cleanStatus.appendChild(document.createTextNode(' 行 · 清洗后 '));
+    el.cleanStatus.appendChild(bold(String(cur)));
+    el.cleanStatus.appendChild(document.createTextNode(' 行'));
+    if (state.ops.length) {
+      el.cleanStatus.appendChild(document.createTextNode('（' + state.ops.length + ' 条规则）'));
+    }
+  }
+
+  function bold(text) {
+    var b = document.createElement('strong');
+    b.textContent = text;
+    return b;
   }
 
   // ---------- 图表类型切换 ----------
@@ -301,15 +529,22 @@
   }
 
   function render() {
-    if (!state.rows.length) return;
-    updateMemberBadge();
+    if (!state.rowsRaw.length) return;
     var def = chartDef(state.chart);
     var size = chartSize();
     var f = state.fields;
     var data = state.typed;
 
     el.chartTitle.textContent = def.icon + ' ' + def.name;
-    el.chartSubtitle.textContent = '数据集：' + state.name + ' · ' + state.rows.length + ' 行';
+    el.chartSubtitle.textContent = '数据集：' + state.name + ' · ' + state.rows.length + ' 行'
+      + (state.ops.length ? '（原始 ' + state.rowsRaw.length + ' 行，已应用 ' + state.ops.length + ' 条清洗规则）' : '');
+
+    if (!state.rows.length) {
+      stopSimulation();
+      showPlaceholder('当前清洗 / 筛选规则下没有剩余数据，请删除或调整规则。');
+      return;
+    }
+    updateMemberBadge();
 
     stopSimulation();
 
@@ -389,6 +624,7 @@
 
   // ---------- 导出 ----------
   function doExport(kind) {
+    if (!state.rows.length) { alert('当前清洗 / 筛选规则下没有数据可导出。'); return; }
     var svg = getChartSVG();
     if (!svg) { alert('当前没有可导出的图表。'); return; }
     var base = 'miokr-' + state.chart;

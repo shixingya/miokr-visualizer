@@ -20,6 +20,7 @@
 }
 .data-stat { display: flex; align-items: center; gap: 6px; color: var(--text-soft); }
 .data-stat strong { color: var(--text); font-weight: 700; }
+.data-stat .dim { color: var(--text-muted); font-size: .78rem; }
 .data-stat .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
 .chip-list { display: flex; gap: 6px; flex-wrap: wrap; }
 .chip {
@@ -51,6 +52,8 @@
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: calc(var(--nav-h) + 20px);
+  max-height: calc(100vh - var(--nav-h) - 40px);
+  overflow-y: auto;
 }
 .panel h4 {
   font-size: .78rem;
@@ -126,6 +129,84 @@
 
 .actions-row { display: flex; gap: 8px; }
 .actions-row .btn { flex: 1; }
+
+/* ---------- 数据清洗与筛选面板 ---------- */
+.clean-status {
+  font-size: .8rem;
+  color: var(--text-soft);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-bottom: 12px;
+}
+.clean-status strong { color: var(--primary-dark); }
+.clean-block { margin-bottom: 14px; }
+.clean-title {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--text-soft);
+  margin-bottom: 6px;
+}
+.field-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.field-row select, .field-row input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: .82rem;
+  color: var(--text);
+  background: #fff;
+}
+.field-row select:focus, .field-row input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+.btn.full { width: 100%; }
+.op-list { margin-bottom: 8px; }
+.op-empty {
+  font-size: .78rem;
+  color: var(--text-muted);
+  padding: 6px 2px;
+}
+.op-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-panel);
+  margin-bottom: 5px;
+  font-size: .76rem;
+}
+.op-label { flex: 1; color: var(--text-soft); line-height: 1.4; }
+.op-count {
+  font-family: var(--mono);
+  font-size: .72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.op-count.down { color: var(--primary-dark); font-weight: 700; }
+.op-del {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: .8rem;
+  padding: 0 2px;
+  line-height: 1;
+}
+.op-del:hover { color: #dc2626; }
+.clean-hint {
+  font-size: .72rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
 
 /* 图表展示区 */
 .chart-area {

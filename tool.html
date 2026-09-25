@@ -27,7 +27,7 @@
   <div class="data-bar">
     <div class="data-bar-inner">
       <div class="data-stat"><span class="dot"></span>数据集：<strong id="statName">—</strong></div>
-      <div class="data-stat">行数：<strong id="statRows">0</strong></div>
+      <div class="data-stat">行数：<strong id="statRows">0</strong><span class="dim" id="statRowsRaw"></span></div>
       <div class="data-stat">列数：<strong id="statCols">0</strong></div>
       <div class="data-stat">数值列：
         <div class="chip-list" id="statNumeric"></div>
@@ -57,6 +57,77 @@
           <label for="sampleSelect">或选择内置示例</label>
           <select id="sampleSelect"></select>
         </div>
+      </div>
+
+      <div class="panel-section">
+        <h4>数据清洗与筛选</h4>
+        <div class="clean-status" id="cleanStatus">原始 0 行 · 当前 0 行</div>
+
+        <div class="clean-block">
+          <div class="clean-title">缺失值处理</div>
+          <div class="field-row">
+            <select id="missCol" title="作用列"></select>
+            <select id="missStrategy" title="处理方式">
+              <option value="drop">删除含空值的行</option>
+              <option value="mean">空值填均值</option>
+              <option value="constant">空值填常数</option>
+            </select>
+          </div>
+          <div class="field-row hidden" id="missConstWrap">
+            <input type="text" id="missConst" placeholder="填充值，如 0 或 N/A">
+          </div>
+          <button class="btn btn-ghost btn-sm full" id="btnMissing">添加缺失值规则</button>
+        </div>
+
+        <div class="clean-block">
+          <div class="clean-title">行去重</div>
+          <div class="field-row">
+            <select id="dedupeCol" title="去重依据列"></select>
+          </div>
+          <button class="btn btn-ghost btn-sm full" id="btnDedupe">去除重复行</button>
+        </div>
+
+        <div class="clean-block">
+          <div class="clean-title">条件筛选</div>
+          <div class="field-row">
+            <select id="filterCol" title="筛选列"></select>
+            <select id="filterMode" title="筛选方式">
+              <option value="range">范围</option>
+              <option value="contains">包含</option>
+              <option value="eq">等于</option>
+              <option value="neq">不等于</option>
+              <option value="gt">大于</option>
+              <option value="lt">小于</option>
+            </select>
+          </div>
+          <div class="field-row" id="filterRangeWrap">
+            <input type="text" id="filterMin" placeholder="最小值(可空)">
+            <input type="text" id="filterMax" placeholder="最大值(可空)">
+          </div>
+          <div class="field-row hidden" id="filterValueWrap">
+            <input type="text" id="filterValue" placeholder="筛选值">
+          </div>
+          <button class="btn btn-ghost btn-sm full" id="btnFilter">添加筛选条件</button>
+        </div>
+
+        <div class="clean-block">
+          <div class="clean-title">行排序</div>
+          <div class="field-row">
+            <select id="sortCol" title="排序列"></select>
+            <select id="sortDir" title="排序方向">
+              <option value="asc">升序</option>
+              <option value="desc">降序</option>
+            </select>
+          </div>
+          <button class="btn btn-ghost btn-sm full" id="btnSort">应用排序</button>
+        </div>
+
+        <div class="clean-block">
+          <div class="clean-title">已应用规则 <span class="muted" id="opsCount">0</span></div>
+          <div class="op-list" id="opsList"></div>
+          <button class="btn btn-ghost btn-sm full" id="btnClearOps">清空全部规则</button>
+        </div>
+        <p class="clean-hint">规则可在列表中逐条删除；所有规则按列表顺序从原始数据依次应用，原始数据不会被改动。均值填充仅作用于数值列。</p>
       </div>
 
       <div class="panel-section">
@@ -117,6 +188,7 @@
   <script src="assets/js/lib/d3-sankey.min.js"></script>
   <!-- 应用模块 -->
   <script src="assets/js/csv.js"></script>
+  <script src="assets/js/clean.js"></script>
   <script src="assets/js/data/samples.js"></script>
   <script src="assets/js/charts.js"></script>
   <script src="assets/js/sankey.js"></script>
